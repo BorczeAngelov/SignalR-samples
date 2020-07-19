@@ -27,30 +27,43 @@
                     <ColumnDefinition   Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBox x:Name="userTextBox"                           
-                           Width="150"
-                           Grid.Column="0" />
+                <TextBox Text="{Binding UserName}"
+                         Width="150"
+                         Grid.Column="0" />
 
-                <TextBox x:Name="messageTextBox"
-                           Margin="5,0"
-                           Grid.Column="1" />
+                <TextBox Text="{Binding UserMessage}"
+                         Margin="5,0"
+                         Grid.Column="1" />
 
-                <Button x:Name="sendButton"
-                        Click="sendButton_Click"
+                <Button Click="SendMessage"
                         Content="Send"
                         Grid.Column="2"
-                        Padding="5" />
+                        IsEnabled="{Binding IsConnected}">
+                </Button>
             </Grid>
         </Border>
 
         <ListView ItemsSource="{Binding Messages}"
                   Grid.Row="1" />
 
-        <Button x:Name="connectButton"
-                Click="connectButton_Click"
+        <Button Click="ConnectWithServer"
                 Content="Connect"
                 Margin="5"
                 HorizontalAlignment="Right"
-                Grid.Row="2" />
+                Grid.Row="2">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="IsEnabled"
+                            Value="True" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsConnected}"
+                                     Value="True">
+                            <Setter Property="IsEnabled"
+                                    Value="False" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
     </Grid>
 </Window>

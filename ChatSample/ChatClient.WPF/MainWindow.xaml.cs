@@ -1,30 +1,19 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ChatClient.WPF
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private readonly HubConnection _connection;
-
-        public ObservableCollection<string> Messages { get; } = new ObservableCollection<string>();
+        private bool _isConnected;
+        private string _userMessage;
 
         public MainWindow()
         {
@@ -36,8 +25,39 @@ namespace ChatClient.WPF
                .Build();
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        private async void connectButton_Click(object sender, RoutedEventArgs e)
+        public ObservableCollection<string> Messages { get; } = new ObservableCollection<string>();
+        public string UserName { get; set; } = "WPF user";
+
+        public string UserMessage
+        {
+            get => _userMessage;
+            set
+            {
+                if (_userMessage != value)
+                {
+                    _userMessage = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserMessage)));
+                }
+            }
+        }
+
+        public bool IsConnected
+        {
+            get => _isConnected;
+            private set
+            {
+                if (_isConnected != value)
+                {
+                    _isConnected = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsConnected)));
+                }
+            }
+        }
+
+
+        private async void ConnectWithServer(object sender, RoutedEventArgs e)
         {
             _connection.On<string, string>("broadcastMessage", (user, message) =>
             {
@@ -52,8 +72,7 @@ namespace ChatClient.WPF
             {
                 await _connection.StartAsync();
                 Messages.Add("Connection started");
-                connectButton.IsEnabled = false;
-                sendButton.IsEnabled = true;
+                IsConnected = true;
             }
             catch (Exception ex)
             {
@@ -61,12 +80,14 @@ namespace ChatClient.WPF
             }
         }
 
-        private async void sendButton_Click(object sender, RoutedEventArgs e)
+        private async void SendMessage(object sender, RoutedEventArgs e)
         {
             try
             {
                 await _connection.InvokeAsync("Send",
-                    userTextBox.Text, messageTextBox.Text);
+                    UserName, UserMessage);
+
+                UserMessage = string.Empty;
             }
             catch (Exception ex)
             {
