@@ -3,6 +3,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using Chat.Utils.SignalR.ChatHub;
 
 namespace ChatClient.WPF
 {
@@ -59,7 +60,7 @@ namespace ChatClient.WPF
 
         private async void ConnectWithServer(object sender, RoutedEventArgs e)
         {
-            _connection.On<string, string>("broadcastMessage", (user, message) =>
+            _connection.On<string, string>(nameof(IChatHubClient.ReceiveServerMessage), (user, message) =>
             {
                 this.Dispatcher.Invoke(() =>
                 {
@@ -84,8 +85,10 @@ namespace ChatClient.WPF
         {
             try
             {
-                await _connection.InvokeAsync("Send",
-                    UserName, UserMessage);
+                await _connection.InvokeAsync(
+                    nameof(IChatHub.UploadMessage),
+                    UserName, 
+                    UserMessage);
 
                 UserMessage = string.Empty;
             }

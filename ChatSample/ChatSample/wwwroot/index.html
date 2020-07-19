@@ -37,7 +37,7 @@
                                 .build();
 
             // Create a function that the hub can call to broadcast messages.
-            connection.on('broadcastMessage', function (name, message) {
+            connection.on('receiveservermessage', function (name, message) {
                 // Html encode display name and message.
                 var encodedName = name;
                 var encodedMsg = message;
@@ -53,7 +53,7 @@
                     console.log('connection started');
                     document.getElementById('sendmessage').addEventListener('click', function (event) {
                         // Call the Send method on the hub.
-                        connection.invoke('send', name, messageInput.value);
+                        connection.invoke('uploadmessage', name, messageInput.value);
 
                         // Clear text box and reset focus for next comment.
                         messageInput.value = '';
